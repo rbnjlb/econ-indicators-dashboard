@@ -1,14 +1,18 @@
 services:
   - type: web
-    name: econ-indicators-api
+    name: generic-api
     env: python
     plan: free
     buildCommand: cd backend && pip install -r requirements.txt
     startCommand: cd backend && uvicorn app:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: FRED_API_KEY
-        sync: false  # You'll set this in Render dashboard
+      - key: APP_NAME
+        value: Generic API
+      - key: APP_VERSION
+        value: 1.0.0
       - key: CORS_ORIGINS
         value: https://your-frontend-domain.onrender.com,http://localhost:5173
+      - key: ENVIRONMENT
+        value: production
       - key: PYTHON_VERSION
         value: 3.11.0

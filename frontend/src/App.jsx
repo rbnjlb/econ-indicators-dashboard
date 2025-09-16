@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import Chart from "./components/Chart";
+import DataTable from "./components/DataTable";
 import { api } from "./services/api";
 
 export default function App() {
-  const [data, setData] = useState([]);
+  const [exampleData, setExampleData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     async function load() {
       try {
-        const result = await api.getWorldBankIndicator("FRA", "NY.GDP.MKTP.CD");
-        setData(result.data || []);
+        const result = await api.getExampleData();
+        setExampleData(result.data || []);
       } catch (e) {
         setError(String(e));
       } finally {
@@ -26,12 +27,28 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: "Inter, system-ui, sans-serif", padding: 24 }}>
-      <h1>Economic Indicators Dashboard</h1>
+      <h1>Generic Dashboard Template</h1>
+      <p>This is a generic template that you can customize for your project.</p>
+      
+      <DataTable 
+        data={exampleData} 
+        title="Example Data Table"
+      />
+      
       <Chart 
-        data={data} 
-        title="GDP (current US$) — World Bank (FRA)"
+        data={exampleData} 
+        title="Example Chart (Line)"
         dataKey="value"
-        xAxisKey="year"
+        xAxisKey="name"
+        type="line"
+      />
+      
+      <Chart 
+        data={exampleData} 
+        title="Example Chart (Bar)"
+        dataKey="value"
+        xAxisKey="name"
+        type="bar"
       />
     </div>
   );

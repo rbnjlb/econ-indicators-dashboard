@@ -1,39 +1,30 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import os, json, httpx
-from cachetools import TTLCache
-from dotenv import load_dotenv
-
-load_dotenv()
+from config import CORS_ORIGINS, FRED_API_KEY, WORLD_BANK_BASE
+from services import fetch_json
 
 app = FastAPI(title="Economic Indicators API", version="0.2.0")
 
-origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-cache = TTLCache(maxsize=256, ttl=1800)
-WORLD_BANK_BASE = "https://api.worldbank.org/v2"
-
-async def fetch_json(url, params=None):
-    key = url + json.dumps(params or {}, sort_keys=True)
-    if key in cache:
-        return cache[key]
-    async with httpx.AsyncClient(timeout=30) as client:
-        r = await client.get(url, params=params)
-        r.raise_for_status()
-        data = r.json()
-    cache[key] = data
-    return data
-
 @app.get("/healthz")
 async def healthz():
-    return {"status": "ok"}
+    return {"status": "ok", "service": "economic-indicators-api"}
+
+@app.get("/")
+async def root():
+    return {
+        "message": "Economic Indicators API", 
+        "version": "0.2.0",
+        "docs": "/docs",
+        "health": "/healthz"
+    }
 
 @app.get("/api/worldbank/indicator")
 async def worldbank_indicator(country: str = "FRA", indicator: str = "NY.GDP.MKTP.CD", per_page: int = 10000):
